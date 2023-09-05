@@ -155,8 +155,9 @@
 				case "delete_label_format21"						: delete_label_format21(); break;
 				case "reprint_label_format21"						: reprint_label_format21(); break;
 
-				/* format 21 */
+				/* format 22 */
 				case "save_new_c3_label_format22"					: save_new_c3_label_format22(); break;
+				case "load_selected_label_info_format22"			: load_selected_label_info_format22(); break;
 				case "reprint_label_format22"						: reprint_label_format22(); break;
 
 				/* format 6 */
@@ -5700,6 +5701,35 @@
 	/***************************************************************/
 	/***************************************************************/
 
+	function load_selected_label_info_format22(){
+		require_once('../class/c3.php'); 
+		$return = $_POST;
+		$array_pkid = $_POST['array_pkid'];
+		$result = "";
+		$array_fields = array('*');
+		$table 	   	= 'vw_format22_new';
+		$joins 	   	= '';
+		$sql_where 	= 'WHERE `pkid` = "'.$array_pkid[0].'"';
+		for($x=1;$x<count($array_pkid);$x++){
+			$sql_where .= ' OR `pkid` = "'.$array_pkid[$x].'"';
+		}
+		$sql_order 	= '';
+		$sql_limit 	= '';
+		$result = C3::getInstance()->select_query($array_fields,$table,$joins,$sql_where,$sql_order,$sql_limit);
+		$return['html'] = '';
+		while($row = mysqli_fetch_array($result)){
+			$return['html'] .= '<tr>';
+			$return['html'] .= '	<td>'.$row['item_name'].'</td>';
+			$return['html'] .= '	<td>'.$row['qty'].'</td>';
+			$return['html'] .= '	<td></td>';
+			$return['html'] .= '	<td>'.$row['lotno'].'-'.$row['lotno_extension'].'</td>';
+			$return['html'] .= '	<td>'.$row['remarks'].'</td>';
+			$return['html'] .= '</tr>';
+		}
+		// $return['msg'] = $result;
+		$return['result'] = json_encode($result);
+		echo json_encode($return);
+	}
 	function save_new_c3_label_format22(){
 		require_once('../class/c3.php');
 		$return 		= $_POST; 
@@ -5718,15 +5748,15 @@
 			}
 			$return['checking']['lotno_extension'][] 	= $lotno_extension;
 			$result 		= "";
-			$table   		= "tbl_format1"; //table name
-			$array_fields 	= array('item_name','qty','lotno','lotno_extension','order_no','remarks','date_encoded','lastupdate','username','emp_number','partial'); //table fields
-			$array_values 	= array($return['txt_itemname'],$return['txt_qty'],$return['txt_lot_no'],$lotno_extension,$return['txt_order_no'],'new_format '.$return['txt_remarks'],date('Y-m-d H:i:s'),date('Y-m-d H:i:s'),$return['username'],strtoupper($return['txt_employee_number_scanner']),(($return['partial'])=='true'?1:0) ); //values to be saved
+			$table   		= "tbl_format22"; //table name
+			$array_fields 	= array('item_name','qty','lotno','lotno_extension','order_no','emboss_packing_date','remarks','date_encoded','lastupdate','username','emp_number','partial'); //table fields
+			$array_values 	= array($return['txt_itemname'],$return['txt_qty'],$return['txt_lot_no'],$lotno_extension,$return['txt_order_no'],$return['txt_date'],'new_format '.$return['txt_remarks'],date('Y-m-d H:i:s'),date('Y-m-d H:i:s'),$return['username'],strtoupper($return['txt_employee_number_scanner']),(($return['partial'])=='true'?1:0) ); //values to be saved
 			$result 		= C3::getInstance()->insert_query($table,$array_fields,$array_values);
 			// $script 		= C3::getInstance()->insert_query_test($table,$array_fields,$array_values);
 			$return["result"] = json_encode($result); //return the the serialize values
 			// $return["script"] = $script; //return the the serialize values
 			/* generate zebra code format 1 */
-			$return['label'][] = generate_zebra_code_format22($return['txt_itemname'],$return['txt_qty'],$return['txt_lot_no'],$lotno_extension,$return['txt_order_no'],$return['txt_remarks']);
+			$return['label'][] = generate_zebra_code_format22($return['txt_itemname'],$return['txt_qty'],$return['txt_lot_no'],$lotno_extension,$return['txt_order_no'],$return['txt_remarks'],$return['txt_date']);
 		}
 		$return["msg"]  = 1;
 		echo json_encode($return); //json encode since I used a dataType json before passing the serialized values here
@@ -5739,7 +5769,7 @@
 		// $array_pkid = array('54511');
 		$result = "";
 		$array_fields = array('*');
-		$table 	   	= 'vw_format1';
+		$table 	   	= 'vw_format22_new';
 		$joins 	   	= '';
 		$sql_where 	= 'WHERE `pkid` = "'.$array_pkid[0].'"';
 		for($x=1;$x<count($array_pkid);$x++){
@@ -5750,14 +5780,13 @@
 		$result = C3::getInstance()->select_query($array_fields,$table,$joins,$sql_where,$sql_order,$sql_limit);
 		$return['label'] = '';
 		while($row = mysqli_fetch_array($result)){
-			$label = generate_zebra_code_format22($row['item_name'],$row['qty'],$row['lotno'],$row['lotno_extension'],$row['order_no'],$row['remarks']);
+			$label = generate_zebra_code_format22($row['item_name'],$row['qty'],$row['lotno'],$row['lotno_extension'],$row['order_no'],$row['remarks'],$row['emboss_packing_date']);
 			$return['label'][] = $label;
 		}
 		// $return['msg'] = $result;
 		$return['result'] = json_encode($result);
 		echo json_encode($return);
 	}
-
 	function generate_zebra_code_format22($item_name,$qty,$lotno,$lotno_extension,$order_no,$remarks){
 		$space 			= get_sticker_alignment_printing();
 		$left_space 	= $space['left_space'];
@@ -5827,6 +5856,79 @@
 
 		return $zebra_code;
 	}
+	/*
+	* NEW FORMAT AS PER REQUEST 2023-09-04 
+	*/
+	// function generate_zebra_code_format22($item_name,$qty,$lotno,$lotno_extension,$order_no,$remarks,$emboss_pack_date){
+	// 	$space 			= get_sticker_alignment_printing();
+	// 	$left_space 	= $space['left_space'];
+	// 	$top_space 		= $space['top_space'];
+	// 	$top_item_name 	= $space['top_item_name'];
+	// 	$top_qty 		= $space['top_qty'];
+	// 	$top_orderno	= $space['top_orderno'];
+	// 	$top_lotno 		= $space['top_lotno'];
+	// 	$font_style_name = $space['font_style_name'];
+
+	// 	$left_space 		= 3;
+	// 	$top_space 			= 10;
+	// 	$top_gap 			= 50;
+	// 	$product_name 		=$item_name; //'HF301S-106-1800-4021-VE';
+	// 	$customer_pn 		='28564936';
+	// 	$customer_column 	='H3844K';
+	// 	// $qty 				=$qty; //'200';
+	// 	$qty 				=str_pad($qty, 5, '0', STR_PAD_LEFT);; //'00200';
+	// 	$id 				='0000016';
+	// 	$lot_no 			="$lotno-$lotno_extension"; //'2904-01A';
+
+	// 	$zebra_code = "^XA";
+	// 	$zebra_code .= "^CWA,E:'.$font_style_name.'.FNT";
+
+	// 	$zebra_code .= "^FO".( 40+ $left_space ).", ".( $top_space+($top_gap*1) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FDYamaichi Electronics Deutschland GmbH";
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 40+ $left_space ).", ".( $top_space+($top_gap*2) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FDProduct:".$product_name;
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 40+ $left_space ).", ".( $top_space+($top_gap*3) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FD".$customer_pn;
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 330+ $left_space ).", ".( $top_space+($top_gap*3) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FDExpires:";
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 40+ $left_space ).", ".( $top_space+($top_gap*4) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FDQty:".$qty."pcs";
+	// 	$zebra_code .= "^FS";
+
+	// 	// $zebra_code .= "^FO".( 350+ $left_space ).", ".( $top_space+($top_gap*4) );
+	// 	// $zebra_code .= "^CF 0,30";
+	// 	// $zebra_code .= "^FDID:".$id;
+	// 	// $zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 330+ $left_space ).", ".( $top_space+($top_gap*4) );
+	// 	$zebra_code .= "^CF 0,30";
+	// 	$zebra_code .= "^FDLot No:".$lot_no;
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^FO".( 40+ $left_space ).", ".( $top_space+($top_gap*5) );
+	// 	$zebra_code .= "^BY2";
+	// 	// $zebra_code .= "^B3N,N,60,Y,N"; // old
+	// 	$zebra_code .= "^BCN, 50, Y, N";
+	// 	$zebra_code .= "^FD".$customer_pn.$customer_column.$emboss_pack_date.$qty;
+	// 	$zebra_code .= "^FS";
+
+	// 	$zebra_code .= "^XZ";
+
+	// 	return $zebra_code;
+	// }
 	
 	function check_existing_item_name_and_lotno_format23(){
 		require_once('../class/c3.php'); 

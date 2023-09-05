@@ -36,16 +36,7 @@
 	$sIndexColumn = "pkid";
 	
 	/* DB table to use */
-	$sTable = "
-	(
-
-select * from vw_format1 where item_name = 'HF301S-106-1800-4021-VE'
-
-	)
-vw_format22
-
-
-	";
+	$sTable = " vw_format22	";
 	
 	require_once('config.php');
 	/* Database connection information */

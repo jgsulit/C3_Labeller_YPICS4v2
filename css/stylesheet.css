@@ -67,24 +67,31 @@ div#container_label{
 
 /* Preview */
 /* format 1 */
+div#sticker_preview div#preview_bc_data {
+   position: absolute;
+   top: 420px;
+   left: 100px;
+   width: 100%;
+}
+
 div#sticker_preview div#preview_item_name{
   position: absolute; 
-   top: 255px; 
-   left: 220px; 
+   top: 290px; 
+   left: 110px; 
    width: 100%;
 }
 
 div#sticker_preview div#preview_qty{
   position: absolute; 
-   top: 285px; 
-   left: 220px; 
+   top: 350px; 
+   left: 70px; 
    width: 100%;
 }
 
 div#sticker_preview div#preview_lot_no{
   position: absolute; 
-   top: 285px; 
-   left: 350px; 
+   top: 350px; 
+   left: 260px; 
    width: 100%;
 }
 

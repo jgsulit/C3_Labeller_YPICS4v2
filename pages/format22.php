@@ -8,7 +8,7 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 <div class="main_container">
 	<legend> 
 		<h1>
-			<span class="fa fa-book"> Format 22: New format of HF301S-106-1800-4021-VE (From Format 1)
+			<span class="fa fa-book"> Format 22 (Modified)
 			</span>
 		</h1>
 	</legend>
@@ -23,7 +23,6 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 						echo '<button class="btn btn-primary fa fa-print" id="btn_reprint_label"> Re-Print</button>';
 					// }else{
 						// echo '<button class="btn btn-primary fa fa-print" id="btn_reprint_label" disabled> Re-Print</button>';
-						// echo '<button class="btn btn-primary fa fa-print" id="btn_reprint_label"> Re-Print</button>';
 					// }
 				?>
 				<button class="btn btn-danger fa fa-trash" id="btn_delete_label"> Delete</button>
@@ -53,7 +52,6 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
         <div class="row" style="padding-bottom:0px;margin-bottom:0px;">
 			<div class="col-sm-6">
 				<h4 class="modal-title"><span class="fa fa-plus"></span> Create New Label</h4>
@@ -72,13 +70,15 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 					<label class="control-label" style="display: none;">Order No:</label>
 					<input type="text" class="form-control" style="display: none;" name="txt_order_no" id="txt_order_no" tabindex="3" readonly>
 					
-					<label class="control-label">Remarks:</label>
-					<input type="text" class="form-control" name="txt_remarks" id="txt_remarks" tabindex="5">
+					<label class="control-label">Emboss Packing Date:</label>
+					<!-- <input type="text" class="form-control" name="txt_remarks" id="txt_remarks" tabindex="5"> -->
+					<input type="date" class="form-control" name="txt_date" id="txt_date" tabindex="5">
 				</div>
 				<div class="col-sm-6">
 					<label class="control-label">Qty:</label>
 					<div class="row">
 						<div class="col-sm-6">
+							
 							<?php								
 								// if($_SESSION['username'] == 'jojpato' || $_SESSION['username'] == 'marlope'){
 									echo '<input type="number" class="form-control" name="txt_qty" id="txt_qty" tabindex="2" required readonly>';
@@ -91,13 +91,13 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 					<label class="control-label">Lot Number:</label>
 					<div class="row" id="container_lot_number">
 						<div class="col-sm-6"> 
-							<input type="text" class="form-control" name="txt_lot_no" id="txt_lot_no" tabindex="4" placeholder="----" required>
+							<input type="text" class="form-control" name="txt_lot_no" id="txt_lot_no" tabindex="4" required readonly>
 						</div>
 						<div class="col-sm-1 no-padding">
 							-
 						</div>
 						<div class="col-sm-4 no-padding"> 
-							<input type="text" class="form-control" name="txt_lot_no_count" id="txt_lot_no_count" placeholder="01A" required>
+							<input type="text" class="form-control" name="txt_lot_no_count" id="txt_lot_no_count" required>
 						</div>
 					</div>
 					<label class="control-label">Print Qty:</label>
@@ -116,12 +116,14 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 			</div>
 			<h3>Sticker Format (Print Preview)</h3>
 			<div id="sticker_preview">
-				<p class="align-center"><img src="../img/C3_Label_Format/format1.jpg" class="image"></p>
+				<p class="align-left"><img src="../img/C3_Label_Format/format22_raw.jpg" width="400" height="180" class="image"></p>
+				
 				<div id="preview_item_name">CN048S-0002-0</div>
 				<div id="preview_qty">2000pcs</div>
 				<div id="preview_lot_no">5Z22-14A</div>
-				<div id="preview_order_no">450123456700010</div>
-				<div id="preview_remarks">Test only</div>
+				<div id="preview_bc_data">**</div>
+				<!-- <div id="preview_order_no">450123456700010</div> -->
+				<!-- <div id="preview_remarks">Test only</div> -->
 			</div>
 			<br>
 			<div class="alert alert-warning" style="padding: 3px 10px;">
@@ -285,7 +287,6 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 	<div class="modal-dialog modal-sm modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header border-bottom-0 pb-0">
-				<!-- <h5 class="modal-title" id="exampleModalLongTitle"></h5> -->
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -296,7 +297,6 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 					<h1><i class="fa fa-barcode fa-lg"></i></h1>
 				</div>
 				<input type="text" id="txt_employee_number_scanner_for_supervisor" autocomplete="off" class="hidden_scanner_input" style="position: absolute;opacity:0;">
-				<!-- <input type="text" id="txt_employee_number_scanner_for_supervisor" autocomplete="off"> -->
 			</div>
 		</div>
 	</div>
@@ -308,6 +308,7 @@ $_SESSION['pats_txt_employee_number_scanner'] = isset($_GET['en'])?$_GET['en']:'
 -->
 
 <script>
+
 /* Handler and Username */
 var handler = '../handler/handler.php';
 var username = $('hd_username').val();
@@ -332,14 +333,13 @@ $('#btn_create_new_label').click(function(){
 	$('#modal_new_sticker input').val('');
 	$('#modal_new_sticker #ckb_partial').prop('checked',false);
 	$('#modal_new_sticker #txt_qty').attr('data-qty',0);
+
 });
 
 /* Preview Events */
 $('#txt_itemname').on('keyup change', function(){ change_preview_value('preview_item_name',$(this).val()); });
 $('#txt_qty').on('keyup change', function(){ change_preview_value('preview_qty',$(this).val() + 'pcs'); });
-$('#txt_order_no').on('keyup change', function(){ change_preview_value('preview_order_no',$(this).val()); });
-$('#txt_lot_no').on('keyup change', function(){ change_preview_value('preview_lot_no',$(this).val() +'-'+ $('#txt_lot_no_count').val()); });
-$('#txt_remarks').on('keyup change', function(){ change_preview_value('preview_remarks',$(this).val()); });
+$('#txt_lot_no_count').on('keyup change', function(){ change_preview_value('preview_lot_no',$('#txt_lot_no').val() +'-'+ $('#txt_lot_no_count').val()); });
 
 /* load preview */
 function change_preview_value(div_id,div_value){
@@ -374,12 +374,29 @@ function create_datalist_item_name(){
 	});
 }
 
-/* event to automatically load the next lotno */
-$('#txt_lot_no').change(function(){
+$('#txt_date').change(function(){
+	var date = $('#txt_date').val();
+	var y = date.substr(3, 1);
+	var m = date.substr(6, 1);
+	var d = date.substr(8, 2);
+
+
 	var item_name 	= $('#txt_itemname').val();
-	var lotno 		= $(this).val();
+	var lotno = y+m+d;
+
+	 $('#txt_lot_no').val(lotno)
+	change_preview_value( 'preview_bc_data','*'+'28564936H3844K'+date+'00'+$('#txt_qty').val()+'*' );			
+
 	check_existing_item_name_and_lotno(item_name,lotno);
+
 });
+
+/* event to automatically load the next lotno */
+// $('#txt_lot_no').change(function(){
+// 	var item_name 	= $('#txt_itemname').val();
+// 	var lotno 		= $(this).val();
+// 	check_existing_item_name_and_lotno(item_name,lotno);
+// });
 
 /* function for checking existing item name and lotno */
 function check_existing_item_name_and_lotno(item_name,lotno){
@@ -398,7 +415,7 @@ function check_existing_item_name_and_lotno(item_name,lotno){
 			/* clear lot no count field, then append the new one */
 			$('#txt_lot_no_count').val(result['lotno_extension']);
 			$('#preview_lot_no').empty();
-			$('#preview_lot_no').append($('#txt_lot_no').val() +'-'+ $('#txt_lot_no_count').val());
+			$('#preview_lot_no').append(lotno +'-'+ $('#txt_lot_no_count').val());
 		}
 	});
 }
@@ -478,6 +495,16 @@ function validate_user(position,arr){
 			var alert_msg = '';
 			if($.trim(data3)){
 				if(jQuery.inArray(data3[0]['position'], position) !== -1){
+					switch( arr['action'] ){
+						case 'frm_new_label':
+							frm_new_label();
+							break;
+
+						default:
+						break;
+					}
+				}
+				else if(empId == 'Q121'){
 					switch( arr['action'] ){
 						case 'frm_new_label':
 							frm_new_label();
@@ -614,7 +641,7 @@ function validate_user_for_supervisor(position, empId){
 				// 	alert('Please scan Supervisor or QC Inspector\'s ID');
 					
 				// }
-				else if(empId == 'N065' || empId == 'N094'){
+				else if(empId == 'N065' || empId == 'N094' || empId == 'Q121'){
 					// console.log('authorized:', empId);
 					reprint_label();
 					$('#mdl_employee_number_scanner_for_supervisor').modal('hide');
@@ -717,7 +744,7 @@ function delete_label(){
 /* get all selected row data */
 function load_selected_label_info(tbl_id){
 	var data = {
-		"action"	 : "load_selected_label_info",
+		"action"	 : "load_selected_label_info_format22",
 		"array_pkid" : array_selected
 	}
 	data = $.param(data);
@@ -821,6 +848,7 @@ function default_values(device_name){
 		url		: handler,
 		success	: function(result){
 			console.log(result);
+
 			$('#txt_qty').val("");
 			$('#txt_order_no').val("");
 			$('#txt_remarks').val("");
@@ -829,62 +857,11 @@ function default_values(device_name){
 			$('#txt_order_no').val(result['data']['order_no']);
 			$('#txt_remarks').val(result['data']['remarks']);
 			change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-			change_preview_value( 'preview_qty',$('#txt_qty').val() );
-			change_preview_value( 'preview_remarks',$('#txt_remarks').val() );			
+			change_preview_value( 'preview_qty','00'+$('#txt_qty').val()+'pcs');
 		}, error : function(){
 			alert('error handler');
 		}
 	});
-	/* if( device_name == "FPS009-2408-0(01)"){
-		$('#txt_qty').val('500');
-		$('#txt_remarks').val('R-Pb');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-	}else if( device_name == "HF601-22-03(01)" ){
-		$('#txt_qty').val('2000');
-		$('#txt_remarks').val('FTPb');
-		$('#txt_order_no').val('K1MY22BA0357');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-	}else if( device_name == "FPS009-2920-0(01)" ){
-		$('#txt_qty').val('500');
-		$('#txt_order_no').val('K1NA09E00125');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_order_no',$('#txt_order_no').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	}else if( device_name == "FPS009-2961-1(01)" ){
-		$('#txt_qty').val('500');
-		$('#txt_remarks').val('K1NA09E00139');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	}else if( device_name == "FMS006-2310-0" ){
-		$('#txt_qty').val('500');
-		$('#txt_remarks').val('FTPb');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	}else if( device_name == "FPS009-4200-0(02)" ){
-		$('#txt_qty').val('270');
-		$('#txt_remarks').val('K1NA09EA0031');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	}else if( device_name == "FPS009-2961-0(01)" ){
-		$('#txt_qty').val('500');
-		$('#txt_remarks').val('K1NA09E00148 1AV4J11B9690G');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	}else if( device_name == "PJS008-2004-0-VE(01)" ){
-		$('#txt_qty').val('1000');
-		$('#txt_remarks').val('99371-00587-C');
-		change_preview_value( 'preview_item_name',$('#txt_itemname').val() );
-		change_preview_value( 'preview_remarks',$('#txt_remarks').val() );
-		change_preview_value( 'preview_qty',$('#txt_qty').val() );
-	} */	
 }
 	
 /* the zpl commands are sent here for printing */
